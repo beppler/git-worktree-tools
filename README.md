@@ -2,7 +2,7 @@
 
 ## Overview
 
-With a bare repo, every branch lives in its own folder and no checkout is "the" repo, so you start a task by creating a folder instead of switching branches. This guide sets up that layout and one command, `git wt`, with the subcommands `clone`, `add` and `remove` to manage it.
+With a bare repo, every branch lives in its own folder and no checkout is "the" repo, so you start a task by creating a folder instead of switching branches. This guide sets up that layout and one command, `git wt`, with the subcommands `init`, `clone`, `add` and `remove` to manage it.
 
 ```text
 ~/projects/project-xxxx/
@@ -23,6 +23,7 @@ The commands:
 
 | Command | What it does |
 | --- | --- |
+| `git wt init [folder]` | Creates an empty repo in this layout (default folder: the current one) with `main` as the default branch |
 | `git wt clone <url> [folder]` | Clones the repo in this layout and creates the default-branch worktree |
 | `git wt add <branch> [base]` | Creates a new branch and worktree from `origin/<base>` (default: the remote's default branch) |
 | `git wt remove <branch>` | Removes the worktree folder and removes the branch (only if merged) |
@@ -47,7 +48,7 @@ Git treats any executable named `git-<name>` on your `PATH` as the subcommand `g
 
 | Script | Command |
 | --- | --- |
-| [`bin/git-wt`](bin/git-wt) | `git wt clone`, `git wt add`, `git wt remove` |
+| [`bin/git-wt`](bin/git-wt) | `git wt init`, `git wt clone`, `git wt add`, `git wt remove` |
 
 Clone this repository, then copy or link the script into `~/.local/bin` and make it executable:
 
@@ -64,6 +65,10 @@ ln -s <this-repo>/bin/git-wt ~/.local/bin/git-wt
 ```
 
 On Windows (Git for Windows), copying the file into `%USERPROFILE%\.local\bin` is enough; `chmod +x` is not needed.
+
+### git wt init
+
+Like `git init`, but in the bare layout: it uses the current folder (or creates `[folder]`), makes an empty `main` branch and its `main/` worktree, and sets the same config as `clone`, including the `origin` fetch refspec. It refuses to run if `.bare` or `.git` already exists, and removes both again if a step fails. The repo has no remote yet; connect it with `git remote add origin <url>`, then push from `main/` with `git push -u origin main`. `git wt add` needs `origin` and that first push.
 
 ### git wt clone
 
