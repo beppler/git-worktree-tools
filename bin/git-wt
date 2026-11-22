@@ -2,10 +2,25 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: git wt clone <url> [folder]" >&2
+  echo "usage: git wt init [folder]" >&2
+  echo "       git wt clone <url> [folder]" >&2
   echo "       git wt add <branch> [base]" >&2
   echo "       git wt remove <branch>" >&2
   exit 1
+}
+
+cmd_init() {
+  mkdir -p "${1:-.}"
+  cd "${1:-.}"
+  [ ! -e .bare ] && [ ! -e .git ] && [ ! -e main ] || { echo "error: .bare, .git or main already exists" >&2; exit 1; }
+  trap 'rm -rf .bare .git' ERR
+  git init --bare -b main .bare
+  echo "gitdir: ./.bare" > .git
+  git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+  git config push.autoSetupRemote true
+  git config worktree.useRelativePaths true
+  git worktree add --orphan -b main main
+  trap - ERR
 }
 
 cmd_clone() {
@@ -54,6 +69,7 @@ cmd_remove() {
 cmd=$1; shift
 
 case "$cmd" in
+  init)   cmd_init "$@" ;;
   clone)  cmd_clone "$@" ;;
   add)    cmd_add "$@" ;;
   remove) cmd_remove "$@" ;;
